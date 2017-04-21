@@ -1,0 +1,183 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+    >group-css-media-queries (v1.4.1)</a>
+</h1>
+<h4>CSS postprocessing: group media queries. Useful for postprocessing preprocessed CSS files :)</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.group-css-media-queries">module group-css-media-queries</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.group-css-media-queries.group-css-media-queries">
+            function <span class="apidocSignatureSpan"></span>group-css-media-queries
+            <span class="apidocSignatureSpan">(css)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.group-css-media-queries" id="apidoc.module.group-css-media-queries">module group-css-media-queries</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.group-css-media-queries.group-css-media-queries" id="apidoc.element.group-css-media-queries.group-css-media-queries">
+        function <span class="apidocSignatureSpan"></span>group-css-media-queries
+        <span class="apidocSignatureSpan">(css)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">group-css-media-queries = function (css) {
+  var emToPxRatio, i, intervalRules, len, m, media, mediaRules, medias, onlyMaxRules, onlyMinRules, otherRules, parsed, ref, rootRules
+, rule, rules;
+  parsed = parseCss(css);
+  medias = {};
+  rootRules = [];
+  ref = parsed.stylesheet.rules;
+  for (i = 0, len = ref.length; i &#x3c; len; i++) {
+    rule = ref[i];
+    if (rule.type === &#x27;media&#x27;) {
+      if (!medias[rule.media]) {
+        medias[rule.media] = [];
+      }
+      medias[rule.media] = medias[rule.media].concat(rule.rules);
+    } else {
+      rootRules.push(rule);
+    }
+  }
+  mediaRules = [];
+  for (media in medias) {
+    rules = medias[media];
+    rule = {
+      type: &#x22;media&#x22;,
+      media: media,
+      rules: rules
+    };
+    if (media.indexOf(&#x22;min-width&#x22;) !== -1) {
+      m = media.match(/min-width:\s*(\d+)(px|em)?/);
+      if (m &#x26;&#x26; m[1]) {
+        rule.minWidth = parseInt(m[1]);
+      }
+      if (m[2]) {
+        rule.unit = m[2];
+      }
+    }
+    if (media.indexOf(&#x22;max-width&#x22;) !== -1) {
+      m = media.match(/max-width:\s*(\d+)(px|em)?/);
+      if (m &#x26;&#x26; m[1]) {
+        rule.maxWidth = parseInt(m[1]);
+      }
+      if (m[2]) {
+        rule.unit = m[2];
+      }
+    }
+    mediaRules.push(rule);
+  }
+  onlyMinRules = mediaRules.filter(function(rule) {
+    return (rule.minWidth != null) &#x26;&#x26; (rule.maxWidth == null);
+  });
+  onlyMaxRules = mediaRules.filter(function(rule) {
+    return (rule.maxWidth != null) &#x26;&#x26; (rule.minWidth == null);
+  });
+  intervalRules = mediaRules.filter(function(rule) {
+    return (rule.minWidth != null) &#x26;&#x26; (rule.maxWidth != null);
+  });
+  otherRules = mediaRules.filter(function(rule) {
+    return indexOf.call(onlyMinRules.concat(onlyMaxRules).concat(intervalRules), rule) &#x3c; 0;
+  });
+  emToPxRatio = 16;
+  onlyMinRules.sort(function(a, b) {
+    var aPxValue, bPxValue;
+    aPxValue = a.minWidth;
+    bPxValue = b.minWidth;
+    if (a.unit === &#x27;em&#x27;) {
+      aPxValue *= emToPxRatio;
+    }
+    if (b.unit === &#x27;em&#x27;) {
+      bPxValue *= emToPxRatio;
+    }
+    return aPxValue - bPxValue;
+  });
+  onlyMaxRules.sort(function(a, b) {
+    var aPxValue, bPxValue;
+    aPxValue = a.maxWidth;
+    bPxValue = b.maxWidth;
+    if (a.unit === &#x27;em&#x27;) {
+      aPxValue *= emToPxRatio;
+    }
+    if (b.unit === &#x27;em&#x27;) {
+      bPxValue *= emToPxRatio;
+    }
+    return bPxValue - aPxValue;
+  });
+  parsed.stylesheet.rules = rootRules.concat(onlyMinRules).concat(onlyMaxRules).concat(intervalRules).concat(otherRules);
+  return stringifyCss(parsed);
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
